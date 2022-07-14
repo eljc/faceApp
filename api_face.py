@@ -20,6 +20,7 @@ print('Encoding Complete')
 def predict(test_image, threshold, uploadWidth, uploadHeight, faces_codificadas, lista_nomes):
     texto_imagem = ''
     piscou = False
+    
     #nomeImagens = ['Elder', 'Aline']
 
     imgS = cv2.resize(test_image, (0, 0), None, 0.25, 0.25)
@@ -46,6 +47,7 @@ def predict(test_image, threshold, uploadWidth, uploadHeight, faces_codificadas,
 
         if matches[matchIndex]:
             #name = nomeImagens[matchIndex].upper()
+            print('Posicao: ', matchIndex)
             nome = lista_nomes[matchIndex].upper()
             top, right, bottom, left = faceLoc
             texto_imagem = nome

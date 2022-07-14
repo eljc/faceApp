@@ -15,6 +15,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///face_app'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db=SQLAlchemy(app)
 
+lista_nomes = []
+lista_imagens = []
+
 class Acolhido(db.Model):
     __tablename__ = 'acolhido'
     id_acolhido=db.Column(db.Integer,primary_key=True)
@@ -108,17 +111,12 @@ def display_image(filename):
 @app.route('/image', methods=['POST'])
 def image():
     print('chamada de image')
-    statement = select(Acolhido)
-    acolhidos = db.session.execute(statement).all()
-    lista_nomes = []
-    lista_imagens = []
-    for aco in acolhidos:        
-        for a in aco:
-            lista_nomes.append(a.nome)
-            lista_imagens.append(a.foto)
-
+    global lista_nomes 
+    global lista_imagens
+    
     faces_codificadas = api_face.obter_imagens_codificadas(lista_imagens)
     #print(faces_codificadas)
+    #print('Posicao Lista Geral: ', acolhidos)
 
     try:
         image_file = request.files['image']  # get the image
@@ -145,7 +143,7 @@ def image():
             uploadHeight = float(uploadHeight)
         # finally run the image through tensor flow object detection`
         # image_object = cv2.imread('face-images/mike/tuan.jpg')
-        image_object = cv2.imdecode(numpy.fromstring(image_file.read(), numpy.uint8), cv2.IMREAD_UNCHANGED)
+        image_object = cv2.imdecode(numpy.frombuffer(image_file.read(), numpy.uint8), cv2.IMREAD_UNCHANGED)
         #response = api_face.predict(image_object, threshold, uploadWidth, uploadHeight)
 
         response = api_face.predict(image_object, threshold, uploadWidth, uploadHeight, faces_codificadas, lista_nomes)
@@ -160,6 +158,16 @@ def image():
 @app.route('/reconhecer')
 def local():
     print('reconhecer')
+    statement = select(Acolhido)    
+    acolhidos = db.session.execute(statement).all()    
+    print('TIPO ACOLHIDOS> ', type(acolhidos))
+    global lista_nomes 
+    global lista_imagens
+    for aco in acolhidos:        
+        for a in aco:
+            lista_nomes.append(a.nome)
+            lista_imagens.append(a.foto)
+    
     return render_template('reconhecer.html')
 
 @app.route('/lista')
